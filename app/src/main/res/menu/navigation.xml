@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_conv"
+        android:icon="@drawable/ic_conv"
+        android:title="@string/title_conv" />
+
+    <item
+        android:id="@+id/navigation_calc"
+        android:icon="@drawable/ic_calc"
+        android:title="@string/title_calc" />
+
+    <item
+        android:id="@+id/navigation_new"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="@string/title_new" />
+
+</menu>
