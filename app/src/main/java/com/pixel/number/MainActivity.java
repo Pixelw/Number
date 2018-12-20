@@ -9,7 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -21,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private Fragment f2 = new Calc();
     private Fragment f3 = new Something();
     private ActionBar bar;
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         fgLists.add(f2);
         fgLists.add(f3);
         bar = getSupportActionBar();
-        final BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        final BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         mViewPager = findViewById(R.id.pager);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
