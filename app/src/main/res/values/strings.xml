@@ -19,11 +19,18 @@
     <string name="del">Delete</string>
     <string name="bin">BIN</string>
     <string name="hex">HEX</string>
+    <string name="dec">DEC</string>
     <string name="equals">=</string>
     <string name="btAdd">+</string>
     <string name="btMin">-</string>
     <string name="btMultiply">×</string>
     <string name="btDivide">÷</string>
+    <string name="btA">A</string>
+    <string name="btB">B</string>
+    <string name="btC">C</string>
+    <string name="btD">D</string>
+    <string name="btE">E</string>
+    <string name="btF">F</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sth">Something</string>

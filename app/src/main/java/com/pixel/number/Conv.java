@@ -1,13 +1,13 @@
 package com.pixel.number;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -35,27 +34,25 @@ public class Conv extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private final int[] btnNUMid = {
+            R.id.buttonZero, R.id.button1, R.id.button2, R.id.button3,
+            R.id.button4, R.id.button5, R.id.button6, R.id.button7, R.id.button8,
+            R.id.button9, R.id.buttonA, R.id.buttonB, R.id.buttonC, R.id.buttonD, R.id.buttonE,
+            R.id.buttonF};
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
-    private final int[] btnNUMid = {
-            R.id.buttonZero, R.id.button1, R.id.button1, R.id.button2, R.id.button3, R.id.button3,
-            R.id.button4, R.id.button5, R.id.button6, R.id.button6, R.id.button7, R.id.button8,
-            R.id.button9};
     private Button btnNum[] = new Button[btnNUMid.length];
-    private EditText inputStr;
-    private TextView hex;
-    private TextView bin;
+    private EditText dec;
+    private EditText hex;
+    private EditText bin;
     private ImageButton bkspBtn;
     private Vibrator mVibrator;
     private long number;
     private long[] paShort = {0, 10, 60, 5};
     private long[] paLong = {0, 10, 100, 30};
-    private View view;
+    private boolean loadingResult = true;
 
     public Conv() {
         // Required empty public constructor
@@ -92,29 +89,30 @@ public class Conv extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        view = inflater.inflate(R.layout.fragment_conv,container,false);
-        inputStr = view.findViewById(R.id.inputs);
+        View view = inflater.inflate(R.layout.fragment_conv, container, false);
+        dec = view.findViewById(R.id.toDec);
         hex = view.findViewById(R.id.toHex);
         bin = view.findViewById(R.id.toBin);
+        dec.setInputType(InputType.TYPE_NULL);
+        hex.setInputType(InputType.TYPE_NULL);
+        bin.setInputType(InputType.TYPE_NULL);
         bkspBtn = view.findViewById(R.id.bkspButton);
         bkspBtn.setEnabled(false);
         mVibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
 
-        inputStr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                inputStr.setCursorVisible(true);
-            }
-        });
-
         bkspBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (inputStr.length() > 0) {
-                    inputStr.setText(inputStr.getText().toString().substring(0, inputStr.length() - 1));//backspace
+                if (dec.hasFocus()) backSpace(dec);
+                if (hex.hasFocus()) backSpace(hex);
+                if (bin.hasFocus()) backSpace(bin);
+            }
+
+            private void backSpace(EditText editText) {
+                if (editText.length() > 0) {
+                    editText.setText(editText.getText().toString().substring(0, editText.length() - 1));
                     mVibrator.vibrate(20);
                 }
-
             }
         });
 
@@ -122,40 +120,154 @@ public class Conv extends Fragment {
             @Override
             public boolean onLongClick(View v) {
                 mVibrator.vibrate(paLong, -1);
-                inputStr.setText("");
-                inputStr.setCursorVisible(false);
+                dec.setText("");
+                hex.setText("");
+                bin.setText("");
                 return false;
             }
         });
 
-        inputStr.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        dec.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    btnNum[2].setEnabled(true);
+                    btnNum[3].setEnabled(true);
+                    btnNum[4].setEnabled(true);
+                    btnNum[5].setEnabled(true);
+                    btnNum[6].setEnabled(true);
+                    btnNum[7].setEnabled(true);
+                    btnNum[8].setEnabled(true);
+                    btnNum[9].setEnabled(true);
+                    btnNum[10].setEnabled(false);
+                    btnNum[11].setEnabled(false);
+                    btnNum[12].setEnabled(false);
+                    btnNum[13].setEnabled(false);
+                    btnNum[14].setEnabled(false);
+                    btnNum[15].setEnabled(false);
+                }
+            }
+        });
 
+        dec.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             public void afterTextChanged(Editable s) {
-                if (inputStr.getText().toString().equals("")) {
-                    hex.setText("0");
-                    bin.setText("0");
-                    bkspBtn.setEnabled(false);
-                } else {
-                    number = Long.parseLong(inputStr.getText().toString());
-                    hex.setText("0x" + Long.toHexString(number).toUpperCase());
-                    bin.setText(Long.toBinaryString(number));
-                    bkspBtn.setEnabled(true);
-                    switch (inputStr.getText().toString()) {
-                        case "39":
-                            Toast.makeText(getActivity(), "miku!!", Toast.LENGTH_SHORT).show();
-                            break;
-                        case "20070831":
-                            Toast.makeText(getActivity(), "birthday!!", Toast.LENGTH_SHORT).show();
-                            break;
-                        default:
-                            break;
+                if (dec.hasFocus() || loadingResult) {
+                    if (dec.getText().toString().equals("")) {
+                        hex.setText("");
+                        bin.setText("");
+                        bkspBtn.setEnabled(false);
+                    } else {
+                        try {
+                            number = Long.parseLong(dec.getText().toString());
+                            hex.setText(Long.toHexString(number).toUpperCase());
+                            bin.setText(Long.toBinaryString(number));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                            Toast.makeText(getActivity(), "Number is too large(overflow)", Toast.LENGTH_SHORT).show();
+                            hex.setText("");
+                            bin.setText("");
+                        }
+                        bkspBtn.setEnabled(true);
+                        switch (dec.getText().toString()) {
+                            case "39":
+                                Toast.makeText(getActivity(), "miku!!", Toast.LENGTH_SHORT).show();
+                                break;
+                            case "20070831":
+                                Toast.makeText(getActivity(), "birthday!!", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+
+        hex.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                for (Button aBtnNum : btnNum) {
+                    aBtnNum.setEnabled(true);
+                }
+            }
+        });
+        hex.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (hex.hasFocus()) {
+                    if (hex.getText().toString().equals("")) {
+                        dec.setText("");
+                        bin.setText("");
+                        bkspBtn.setEnabled(false);
+                    } else {
+                        try {
+                            number = Long.valueOf(hex.getText().toString(), 16);
+                            dec.setText(Long.toString(number));
+                            bin.setText(Long.toBinaryString(number));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(getActivity(), "Wrong input(hex)", Toast.LENGTH_SHORT).show();
+                            dec.setText("");
+                            bin.setText("");
+                        }
+                        bkspBtn.setEnabled(true);
+                    }
+                }
+
+            }
+        });
+
+        bin.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                for (int i = 2; i <= 15; i++) {
+                    btnNum[i].setEnabled(false);
+                }
+            }
+        });
+
+        bin.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (bin.hasFocus()) {
+                    if (bin.getText().toString().equals("")) {
+                        dec.setText("");
+                        hex.setText("");
+                        bkspBtn.setEnabled(false);
+                    } else {
+                        try {
+                            number = Long.valueOf(bin.getText().toString(), 2);
+                            dec.setText(Long.toString(number));
+                            hex.setText(Long.toHexString(number).toUpperCase());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(getActivity(), "Wrong input(binary)", Toast.LENGTH_SHORT).show();
+                            hex.setText("");
+                            dec.setText("");
+                        }
+                        bkspBtn.setEnabled(true);
                     }
                 }
 
@@ -171,12 +283,53 @@ public class Conv extends Fragment {
     }
 
     private void loadResult() {
-        SharedPreferences last = getActivity().getSharedPreferences("last",MODE_PRIVATE);
-        inputStr.setText(last.getString("LastResult", ""));
+        SharedPreferences last = getActivity().getSharedPreferences("last", MODE_PRIVATE);
+        dec.setText(last.getString("LastResult", ""));
+        loadingResult = false;
         if (!last.contains("LastResult")) {
             Toast.makeText(getContext(), "There is no last result.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences.Editor editor = getActivity().getSharedPreferences("last", MODE_PRIVATE).edit();
+        editor.putString("LastResult", dec.getText().toString());
+        editor.apply();
+        Toast.makeText(getContext(), "Result Saved", Toast.LENGTH_SHORT).show();
+        mVibrator.cancel();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
     class KeyDown implements View.OnTouchListener {
 
         @Override
@@ -197,57 +350,9 @@ public class Conv extends Fragment {
 
         @Override
         public void onClick(View v) {
-            //mVibrator.vibrate(10);
-            inputStr.append(digit);
+            if (dec.hasFocus()) dec.append(digit);
+            if (hex.hasFocus()) hex.append(digit);
+            if (bin.hasFocus()) bin.append(digit);
         }
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-   /*
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-*/
-    @Override
-    public void onPause() {
-        super.onPause();
-        SharedPreferences.Editor editor = getActivity().getSharedPreferences("last", MODE_PRIVATE).edit();
-        editor.putString("LastResult", inputStr.getText().toString());
-        editor.apply();
-        Toast.makeText(getContext(), "Result Saved", Toast.LENGTH_SHORT).show();
-        mVibrator.cancel();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }
